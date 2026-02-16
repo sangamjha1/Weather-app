@@ -1,0 +1,698 @@
+/* =========================================================
+   ROOT THEME VARIABLES
+========================================================= */
+
+:root{
+    --bg1:#0b1220;
+    --bg2:#111827;
+
+    --card:rgba(255,255,255,0.06);
+    --border:rgba(255,255,255,0.12);
+
+    --text:#e5e7eb;
+    --muted:#9ca3af;
+}
+
+/* LIGHT THEME */
+.light{
+    --bg1:#f3f9ff;
+    --bg2:#e8f4ff;
+
+    --card:rgba(255,255,255,0.92);
+    --border:rgba(0,0,0,0.08);
+
+    --text:#0f172a;
+    --muted:#475569;
+}
+
+/* =========================================================
+   BASE
+========================================================= */
+
+body{
+    margin:0;
+    font-family:"Inter",system-ui,sans-serif;
+    color:var(--text);
+    min-height:100vh;
+    background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    transition:.35s;
+    overflow-x:hidden;
+}
+
+/* UI ABOVE SKY */
+header,.dashboard{position:relative;z-index:5;}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:30px 40px 10px;
+}
+
+/* SEARCH CONTAINER */
+.search-box{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+
+/* ================= INPUT (BASE = DARK THEME) ================= */
+
+.search-box input{
+    padding:12px 14px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,0.06);
+    color:var(--text);
+    width:230px;
+    transition:.25s;
+}
+
+/* focus for both themes */
+.search-box input:focus{
+    outline:none;
+    border-color:#38bdf8;
+    box-shadow:0 0 0 3px rgba(56,189,248,.25);
+}
+
+
+/* ================= LIGHT MODE FIX ================= */
+
+.light .search-box input{
+    background:rgba(255, 255, 255, 0.766);
+    border:1px solid rgba(0,0,0,.12);
+    color:#0f172a;
+
+    box-shadow:
+        inset 0 1px 2px rgba(0,0,0,.08),
+        0 2px 10px rgba(0,0,0,.06);
+
+    backdrop-filter:blur(6px);
+}
+
+.light .search-box input::placeholder{
+    color:#64748b;
+}
+
+
+/* ================= SEARCH BUTTON ================= */
+
+#searchBtn{
+    padding:10px 18px;
+    border-radius:30px;
+    border:none;
+    background:linear-gradient(135deg,#38bdf8,#0ea5e9);
+    color:white;
+    font-weight:600;
+    letter-spacing:.4px;
+    box-shadow:0 6px 20px rgba(14,165,233,.35);
+    transition:.25s;
+}
+
+#searchBtn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 30px rgba(14,165,233,.45);
+}
+
+#searchBtn:active{
+    transform:translateY(1px) scale(.98);
+    box-shadow:0 4px 12px rgba(14,165,233,.35);
+}
+
+/* ================= LOCATION BUTTON — PREMIUM ================= */
+
+#locBtn{
+    position:relative;
+    padding:10px 18px 10px 28px;
+    border-radius:30px;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:var(--text);
+    cursor:pointer;
+    overflow:hidden;
+
+    backdrop-filter:blur(12px);
+
+    transition:
+        transform .18s ease,
+        box-shadow .25s ease,
+        border-color .25s ease,
+        background .25s ease;
+}
+
+/* Hover — lifts like a real button */
+#locBtn:hover{
+    transform:translateY(-2px);
+    border-color:rgba(34,197,94,.6);
+    box-shadow:
+        0 8px 22px rgba(0,0,0,.35),
+        inset 0 0 12px rgba(34,197,94,.15);
+}
+
+/* Press — tactile feel */
+#locBtn:active{
+    transform:translateY(1px) scale(.98);
+    box-shadow:
+        inset 0 4px 14px rgba(0,0,0,.45),
+        0 4px 10px rgba(0,0,0,.25);
+}
+
+
+/* ================= GPS DOT ================= */
+
+#locBtn::before{
+    content:"";
+    position:absolute;
+    left:11px;
+    top:50%;
+    transform:translateY(-50%);
+    width:8px;
+    height:8px;
+    background:#22c55e;
+    border-radius:50%;
+    box-shadow:
+        0 0 6px #22c55e,
+        0 0 12px #22c55e;
+}
+
+/* radar waves */
+#locBtn::after{
+    content:"";
+    position:absolute;
+    left:11px;
+    top:50%;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    border:2px solid #22c55e;
+    transform:translate(-50%,-50%);
+    animation:radar 2.4s infinite;
+}
+
+@keyframes radar{
+    0%{
+        transform:translate(-50%,-50%) scale(.5);
+        opacity:.9;
+    }
+    70%{
+        opacity:.15;
+    }
+    100%{
+        transform:translate(-50%,-50%) scale(3);
+        opacity:0;
+    }
+}
+
+
+/* ================= SHINE PASS (makes it feel clickable) ================= */
+
+#locBtn .shine{
+    display:none;
+}
+
+#locBtn::marker{display:none;}
+
+#locBtn::selection{background:transparent;}
+
+#locBtn::before,
+#locBtn::after{
+    pointer-events:none;
+}
+
+#locBtn::selection{background:none;}
+
+#locBtn:focus{outline:none;}
+
+#locBtn::after{
+    animation:radar 2.4s infinite;
+}
+
+#locBtn::before{z-index:2}
+
+/* moving highlight */
+#locBtn span{position:relative;z-index:3}
+
+#locBtn::after,
+#locBtn::before{mix-blend-mode:normal}
+
+#locBtn::after{
+    box-shadow:none;
+}
+
+/* glass shine */
+#locBtn::before,
+#locBtn::after{pointer-events:none}
+
+#locBtn::after{
+    border:2px solid rgba(34,197,94,.8);
+}
+
+/* sweep light */
+#locBtn:hover{
+    background:
+        linear-gradient(120deg, transparent 30%, rgba(255,255,255,.18), transparent 70%),
+        var(--card);
+    background-size:250% 100%;
+    animation:shineMove 1.1s ease;
+}
+
+@keyframes shineMove{
+    from{background-position:-200% 0;}
+    to{background-position:200% 0;}
+}
+
+
+/* =========================================================
+   DASHBOARD LAYOUT
+========================================================= */
+
+.dashboard{
+    display:grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap:28px;
+    padding:20px 40px 40px;
+    align-items:start;
+}
+
+
+/* =========================================================
+   LEFT MAIN WEATHER PANEL
+========================================================= */
+
+.current{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:28px;
+    padding:38px;
+    backdrop-filter:blur(18px);
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+
+    min-height:380px;
+}
+
+/* CITY + DESCRIPTION */
+.top h2{
+    font-size:30px;
+    font-weight:700;
+    letter-spacing:.3px;
+}
+
+.top p{
+    margin-top:6px;
+    color:var(--muted);
+    font-size:15px;
+}
+
+
+/* TEMPERATURE AREA */
+
+.temp-box{
+    display:flex;
+    align-items:center;
+    gap:28px;
+    margin:40px 0 30px;
+}
+
+.temp-box img{
+    width:92px;
+    filter:drop-shadow(0 4px 14px rgba(0,0,0,.25));
+}
+
+.temp{
+    font-size:92px;
+    font-weight:800;
+    letter-spacing:.5px;
+    line-height:1;
+}
+
+
+/* SUNRISE / SUNSET */
+
+.sun{
+    display:flex;
+    justify-content:space-between;
+    margin-top:auto;
+    padding-top:20px;
+    border-top:1px solid var(--border);
+}
+
+.sun div{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    font-size:14px;
+    color:var(--muted);
+}
+
+.sun span{
+    font-size:17px;
+    font-weight:600;
+    color:var(--text);
+}
+
+
+/* =========================================================
+   RIGHT WEATHER DETAILS GRID
+========================================================= */
+
+.details{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+
+/* =========================================================
+   WEATHER DETAIL CARDS (FILLED STYLE)
+========================================================= */
+
+.card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:18px 22px;
+    backdrop-filter:blur(18px);
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+
+    min-height:110px;
+    transition:.25s ease;
+
+    /* label */
+    font-size:15px;
+    font-weight:600;
+    color:var(--muted);
+}
+
+/* VALUE CONTAINER */
+.card > div{
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    margin-top:10px;
+}
+/* CARD TITLE */
+.card{
+    font-size:16px;
+    font-weight:600;
+    color:var(--muted);
+    letter-spacing:.3px;
+}
+
+/* make label visually stronger */
+.card > div:first-child,
+.card:not(:has(div)) {
+    font-weight:700;
+    font-size:17px;
+    color:var(--text);
+    opacity:.9;
+}
+
+/* BIG NUMBER */
+/* VALUE (AUTO FIT INSIDE CARD) */
+.card span{
+    display:inline-block;
+    margin-top:14px;
+
+    font-size:clamp(24px, 3vw, 34px);
+    font-weight:700;
+    letter-spacing:.3px;
+    color:var(--text);
+
+    white-space:nowrap;   /* prevents line break */
+}
+
+/* UNITS */
+.unit{
+    font-size:0.55em;
+    margin-left:6px;
+    opacity:.75;
+    font-weight:600;
+}
+
+/* AQI special handling */
+#aqi{
+    font-size:clamp(20px, 2.4vw, 30px);
+    font-weight:700;
+}
+
+
+/* hover depth */
+.card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 14px 45px rgba(0,0,0,.18);
+}
+
+
+/* =========================================================
+   SUNRISE SUNSET
+========================================================= */
+
+.sun{
+    margin-top:28px;
+    padding-top:18px;
+    border-top:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+}
+
+.sun span{
+    font-weight:600;
+}
+
+body:not(.light) .sun span{
+    text-shadow:0 0 8px rgba(255,255,255,.35);
+}
+
+/* ================= DAY SKY ================= */
+
+.sky{
+    position:fixed;
+    inset:0;
+    display:none;
+    pointer-events:none;
+}
+
+/* show only in light mode */
+.light .sky{
+    display:block;
+    background:linear-gradient(#bfe3ff,#eaf6ff 60%,#ffffff);
+}
+
+
+/* ===== CLOUD FIELD (header area only) ===== */
+.light .sky::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:170px;          /* same height as night stars */
+    pointer-events:none;
+
+    background-image:
+
+        /* large soft clouds */
+        radial-gradient(80px 40px at 10% 40%, rgba(255,255,255,.95), transparent 70%),
+        radial-gradient(90px 45px at 25% 70%, rgba(255,255,255,.9), transparent 72%),
+        radial-gradient(70px 35px at 45% 30%, rgba(255,255,255,.95), transparent 70%),
+        radial-gradient(100px 50px at 60% 65%, rgba(255,255,255,.9), transparent 75%),
+        radial-gradient(80px 40px at 78% 40%, rgba(255,255,255,.92), transparent 70%),
+        radial-gradient(70px 35px at 92% 75%, rgba(255,255,255,.9), transparent 70%),
+
+        /* small depth clouds */
+        radial-gradient(40px 22px at 15% 15%, rgba(255,255,255,.85), transparent 70%),
+        radial-gradient(35px 18px at 35% 85%, rgba(255,255,255,.8), transparent 70%),
+        radial-gradient(45px 20px at 55% 10%, rgba(255,255,255,.85), transparent 70%),
+        radial-gradient(40px 22px at 75% 80%, rgba(255,255,255,.8), transparent 70%);
+
+    filter:blur(0.3px);
+}
+
+
+/* ================= NIGHT SKY ================= */
+
+.night{
+    position:fixed;
+    inset:0;
+    display:none;
+    pointer-events:none;
+}
+
+/* show only in dark */
+body:not(.light) .night{
+    display:block;
+    background:radial-gradient(ellipse at bottom,#020617 0%,#000814 70%,#000 100%);
+}
+
+
+/* ===== MOON (smaller + higher + centered visually) ===== */
+.night > .moon{
+    position:fixed;
+    top: 35px;                 /* moved upward */
+    left:40%;
+    transform:translateX(-50%);
+    width:110px;              /* smaller */
+    height:110px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 30%,#fff,#e2e8f0 55%,#93c5fd);
+    box-shadow:
+        0 0 40px rgba(255,255,255,.45),
+        0 0 100px rgba(147,197,253,.25);
+    z-index:1;
+}
+
+
+/* ===== HEADER SKY AREA ===== */
+.stars{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:170px;            /* ONLY HEADER HEIGHT */
+    pointer-events:none;
+    z-index:2;
+    overflow:hidden;
+}
+
+
+/* ===== MAIN STARS ===== */
+.stars::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+        radial-gradient(4px 4px at 8% 25%, white, transparent),
+        radial-gradient(5px 5px at 18% 60%, white, transparent),
+        radial-gradient(4px 4px at 28% 35%, white, transparent),
+        radial-gradient(6px 6px at 38% 70%, white, transparent),
+        radial-gradient(4px 4px at 50% 15%, white, transparent),
+        radial-gradient(5px 5px at 60% 55%, white, transparent),
+        radial-gradient(4px 4px at 70% 30%, white, transparent),
+        radial-gradient(6px 6px at 80% 75%, white, transparent),
+        radial-gradient(5px 5px at 90% 40%, white, transparent),
+        radial-gradient(4px 4px at 96% 15%, white, transparent);
+    animation:twinkle 2.2s infinite alternate ease-in-out;
+    filter:drop-shadow(0 0 6px white);
+}
+
+
+/* ===== SECOND DEPTH LAYER ===== */
+.stars::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+        radial-gradient(3px 3px at 12% 80%, #fff, transparent),
+        radial-gradient(3px 3px at 22% 15%, #fff, transparent),
+        radial-gradient(3px 3px at 42% 50%, #fff, transparent),
+        radial-gradient(3px 3px at 58% 85%, #fff, transparent),
+        radial-gradient(3px 3px at 72% 12%, #fff, transparent),
+        radial-gradient(3px 3px at 85% 60%, #fff, transparent);
+    opacity:.85;
+    animation:twinkle 3.4s infinite alternate ease-in-out;
+}
+
+
+/* ===== TWINKLE ===== */
+@keyframes twinkle{
+    0%{opacity:.35}
+    50%{opacity:1}
+    100%{opacity:.45}
+}
+
+/* =========================================================
+   PERFECT TOGGLE SWITCH (FINAL)
+========================================================= */
+
+/* ================= GLASS TOGGLE TRACK ================= */
+
+.theme-toggle{
+    width:86px;
+    height:42px;
+    border-radius:50px;
+    position:relative;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    padding:5px;
+
+    /* glass look */
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(12px) saturate(140%);
+    -webkit-backdrop-filter:blur(12px) saturate(140%);
+
+    border:1px solid rgba(255,255,255,0.18);
+    box-shadow:
+        inset 0 0 12px rgba(255,255,255,0.08),
+        0 6px 18px rgba(0,0,0,0.35);
+
+    transition:.35s;
+}
+
+.light .theme-toggle{
+    background:rgba(255,255,255,0.55);
+    border:1px solid rgba(0,0,0,0.12);
+
+    box-shadow:
+        inset 0 0 8px rgba(255,255,255,0.8),
+        0 6px 18px rgba(0,0,0,0.15);
+}
+.theme-toggle:hover{
+    transform:translateY(-1px);
+    box-shadow:
+        inset 0 0 12px rgba(255,255,255,0.12),
+        0 10px 24px rgba(0,0,0,0.45);
+}
+
+
+.toggle-thumb{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    position:absolute;
+    top:50%;
+    left:5px;
+    transform:translateY(-50%);
+    background:#fff;
+    transition:.35s cubic-bezier(.4,0,.2,1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* move right in day */
+.light .toggle-thumb{
+    left:calc(100% - 37px);
+}
+
+/* moon */
+/* DARK MODE MOON — inverted colors */
+.toggle-thumb::before{
+    content:"";
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:#ffffff;              /* white glow side */
+    box-shadow:
+        -5px -2px 0 4px #020617 inset, /* black moon body */
+        0 0 6px rgba(255,255,255,.35);
+}
+
+
+/* sun */
+.light .toggle-thumb::before{
+    background:#facc15;
+    box-shadow:0 0 10px rgba(250,204,21,.9),
+               0 0 0 4px rgba(250,204,21,.35);
+}

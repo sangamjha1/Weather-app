@@ -1,0 +1,10 @@
+@media (max-width: 500px) {
+    .app {
+        width: 95%;
+    }
+
+    .details {
+        flex-direction: column;
+        gap: 5px;
+    }
+}

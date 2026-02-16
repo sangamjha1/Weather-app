@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mausam Forecast </title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/loader.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+
+    <!-- SKY LAYERS -->
+    <div class="sky-layer">
+        <div class="sky">
+            <div class="cloud cloud1"></div>
+            <div class="cloud cloud2"></div>
+            <div class="cloud cloud3"></div>
+        </div>
+
+        <div class="night">
+            <div class="moon"></div>
+            <div class="stars"></div>
+            <div class="shooting-star"></div>
+        </div>
+    </div>
+
+    <div class="app">
+
+        <!-- HEADER -->
+        <header>
+            <h1>Mausam Forecast</h1>
+
+            <div class="search-box">
+
+                <input type="text" id="cityInput" placeholder="Search city...">
+
+                <button id="searchBtn" class="btn-search">
+                    <span>Search</span>
+                </button>
+
+                <button id="locBtn" class="btn-location">
+                    <span class="pulse"></span>
+                    Current
+                </button>
+
+                <!-- THEME SWITCH -->
+                <div id="themeToggle" class="theme-toggle">
+                    <div class="toggle-track">
+                        <div class="toggle-thumb">
+                            <span class="toggle-icon sun"></span>
+                            <span class="toggle-icon moon"></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+
+        <!-- DASHBOARD -->
+        <main class="dashboard">
+
+            <!-- LEFT PANEL -->
+            <section class="current">
+
+                <div class="top">
+                    <h2 id="city">--</h2>
+                    <p id="description">Search a city to view weather</p>
+                </div>
+
+                <div class="temp-box">
+                    <img id="icon" src="" alt="Weather icon">
+                    <div class="temp" id="temp">--°C</div>
+                </div>
+
+                <div class="sun">
+                    <div class="sun-block">
+                        <label>Sunrise</label>
+                        <span id="sunrise">--:--</span>
+                    </div>
+                    <div class="sun-block">
+                        <label>Sunset</label>
+                        <span id="sunset">--:--</span>
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- RIGHT PANEL -->
+            <section class="details">
+
+                <div class="card">
+                    Feels Like
+                    <div>
+                        <span id="feels">--</span><span class="unit">°C</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    Humidity
+                    <div>
+                        <span id="humidity">--</span><span class="unit">%</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    Wind
+                    <div>
+                        <span id="wind">--</span><span class="unit">m/s</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    Pressure
+                    <div>
+                        <span id="pressure">--</span><span class="unit">hPa</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    Visibility
+                    <div>
+                        <span id="visibility">--</span><span class="unit">m</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    AQI
+                    <div>
+                        <span id="aqi">--</span>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JS FILES -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
