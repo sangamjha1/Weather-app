@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const cityInput = document.getElementById("cityInput");
     const locBtn = document.getElementById("locBtn");
     const themeToggle = document.getElementById("themeToggle");
-
     const aqiEl = document.getElementById("aqi");
 
 
@@ -12,14 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
        THEME SYSTEM (PERSISTENT)
     ========================================================= */
 
-    // Load saved theme
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "light") document.body.classList.add("light");
 
-    // Toggle theme
     themeToggle.addEventListener("click", () => {
         document.body.classList.toggle("light");
-
         const mode = document.body.classList.contains("light") ? "light" : "dark";
         localStorage.setItem("theme", mode);
     });
@@ -46,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     showWeather(data);
                     loadAQI(data.lat, data.lon);
+
                 } catch {
                     console.warn("Location weather failed");
                 }
@@ -81,12 +78,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Button search
     searchBtn.addEventListener("click", () => {
         handleSearch(cityInput.value.trim());
     });
 
-    // Enter search
     cityInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") handleSearch(cityInput.value.trim());
     });
@@ -102,19 +97,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   AQI FETCHER
+   AQI FETCHER (NOW USES SERVERLESS FUNCTION)
 ========================================================= */
 
 async function loadAQI(lat, lon) {
+
     const aqiEl = document.getElementById("aqi");
 
     try {
-        const res = await fetch(`http://localhost:5000/api/air?lat=${lat}&lon=${lon}`);
-        const data = await res.json();
+        const data = await fetchAQI(lat, lon);
 
         if (data && data.aqi !== null) {
-            const text = `${data.aqi} (${data.aqiLabel})`;
-            aqiEl.innerText = text;
+            aqiEl.innerText = `${data.aqi} (${data.aqiLabel})`;
             colorAQI(data.aqiLabel);
         } else {
             aqiEl.innerText = "--";
