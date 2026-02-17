@@ -1,140 +1,85 @@
-/* =========================================================
-   OPENWEATHER CONFIG
-========================================================= */
-
 const API_KEY = "3d209e7f431f7f80c9ed98c752708592";
-const BASE_URL = "https://api.openweathermap.org/data/2.5";
 
-
-/* =========================================================
-   FETCH WEATHER BY CITY
-========================================================= */
+/* ================= WEATHER BY CITY ================= */
 
 async function fetchWeather(city) {
-
     try {
         const res = await fetch(
-            `${BASE_URL}/weather?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`
+            `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`
         );
+
+        if (!res.ok) return { error: true };
 
         const data = await res.json();
 
-        // API returns cod: "404" when city not found
-        if (data.cod != 200) {
-            return { error: true, message: data.message };
-        }
+        return formatWeatherData(data);
 
-        return formatWeather(data);
-
-    } catch (err) {
-        console.error("Weather fetch failed:", err);
+    } catch {
         return { error: true };
     }
 }
 
-
-/* =========================================================
-   FETCH WEATHER BY COORDINATES (GPS)
-========================================================= */
+/* ================= WEATHER BY COORDS ================= */
 
 async function fetchWeatherByCoords(lat, lon) {
-
     try {
         const res = await fetch(
-            `${BASE_URL}/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
+            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
         );
+
+        if (!res.ok) return { error: true };
 
         const data = await res.json();
 
-        if (data.cod != 200) return { error: true };
+        return formatWeatherData(data);
 
-        return formatWeather(data);
-
-    } catch (err) {
-        console.error("Geo weather failed:", err);
+    } catch {
         return { error: true };
     }
 }
 
-
-/* =========================================================
-   FETCH AIR QUALITY
-========================================================= */
+/* ================= AQI ================= */
 
 async function fetchAQI(lat, lon) {
-
     try {
         const res = await fetch(
-            `${BASE_URL}/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
+            `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
         );
+
+        if (!res.ok) return null;
 
         const data = await res.json();
 
-        if (!data || !data.list || !data.list.length)
-            return { error: true };
-
-        const aqiValue = data.list[0].main.aqi;
-        const aqiLabel = aqiToText(aqiValue);
+        const aqi = data.list[0].main.aqi;
 
         return {
-            aqi: convertAQI(aqiValue),
-            aqiLabel
+            aqi,
+            aqiLabel: ["Good","Fair","Moderate","Poor","Very Poor"][aqi - 1]
         };
 
-    } catch (err) {
-        console.error("AQI failed:", err);
-        return { error: true };
+    } catch {
+        return null;
     }
 }
 
+/* ================= FORMAT ================= */
 
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function formatWeather(data) {
+function formatWeatherData(d) {
     return {
-        city: data.name,
-        country: data.sys.country,
-        description: data.weather[0].description,
-        icon: data.weather[0].icon,
-
-        temp: data.main.temp,
-        feels: data.main.feels_like,
-        humidity: data.main.humidity,
-        pressure: data.main.pressure,
-        visibility: data.visibility,
-        wind: data.wind.speed,
-
-        sunrise: data.sys.sunrise,
-        sunset: data.sys.sunset,
-        timezone: data.timezone,
-
-        lat: data.coord.lat,
-        lon: data.coord.lon
+        city: d.name,
+        country: d.sys.country,
+        temp: d.main.temp,
+        feels: d.main.feels_like,
+        humidity: d.main.humidity,
+        pressure: d.main.pressure,
+        visibility: d.visibility,
+        wind: d.wind.speed,
+        description: d.weather[0].description,
+        icon: d.weather[0].icon,
+        sunrise: d.sys.sunrise,
+        sunset: d.sys.sunset,
+        timezone: d.timezone,
+        lat: d.coord.lat,
+        lon: d.coord.lon
     };
-}
-
-
-/* Convert OWM AQI (1-5) → Approx real AQI scale */
-function convertAQI(level) {
-    const map = {
-        1: 40,
-        2: 80,
-        3: 130,
-        4: 200,
-        5: 300
-    };
-    return map[level] || level;
-}
-
-function aqiToText(level) {
-    const labels = {
-        1: "Good",
-        2: "Fair",
-        3: "Moderate",
-        4: "Poor",
-        5: "Very Poor"
-    };
-    return labels[level] || "Unknown";
 }

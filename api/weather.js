@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
 
     const { city, lat, lon, type } = req.query;
-    const API_KEY = process.env.WEATHER_API_KEY;
+    const API_KEY = "3d209e7f431f80c9ed98c752708592";
 
     let url = "";
 
