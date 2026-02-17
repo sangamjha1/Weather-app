@@ -107,16 +107,12 @@ async function loadAQI(lat, lon) {
     try {
         const data = await fetchAQI(lat, lon);
 
-        if (!data) {
+        if (data && data.aqi !== null) {
+            aqiEl.innerText = `${data.aqi} (${data.aqiLabel})`;
+            colorAQI(data.aqiLabel);
+        } else {
             aqiEl.innerText = "--";
-            return;
         }
-
-        const level = data.main.aqi;
-        const label = ["Good","Fair","Moderate","Poor","Very Poor"][level - 1];
-
-        aqiEl.innerText = `${level} (${label})`;
-        colorAQI(label);
 
     } catch {
         aqiEl.innerText = "--";
