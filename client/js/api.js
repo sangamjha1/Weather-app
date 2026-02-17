@@ -1,21 +1,19 @@
-const BASE_URL = "http://localhost:5000/api/weather";
-
+// WEATHER BY CITY
 async function fetchWeather(city) {
     try {
-        const res = await fetch(`${BASE_URL}?city=${city}`);
-        if (!res.ok) throw new Error();
+        const res = await fetch(`/api/weather?city=${city}`);
         return await res.json();
     } catch {
-        return { error: true };
+        return { error: "Network error" };
     }
 }
 
+// WEATHER BY GPS
 async function fetchWeatherByCoords(lat, lon) {
     try {
-        const res = await fetch(`${BASE_URL}?lat=${lat}&lon=${lon}`);
-        if (!res.ok) throw new Error();
+        const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
         return await res.json();
     } catch {
-        return { error: true };
+        return { error: "Network error" };
     }
 }
