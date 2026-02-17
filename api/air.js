@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
 
   const { lat, lon } = req.query;
-  const API_KEY = process.env.WEATHER_API_KEY;
+  const API_KEY = "3d209e7f431f80c9ed98c752708592";
 
   if (!lat || !lon)
     return res.status(400).json({ error: "Missing coordinates" });
