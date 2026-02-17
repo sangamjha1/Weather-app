@@ -1,8 +1,12 @@
+/* =========================================================
+   DYNAMIC BACKGROUND (DARK MODE ONLY)
+========================================================= */
 function setBackground(description) {
 
     if (document.body.classList.contains("light")) return;
 
     const body = document.body;
+    description = description.toLowerCase();
 
     if (description.includes("rain"))
         body.style.setProperty("--bg2", "#1d3557");
@@ -21,46 +25,54 @@ function setBackground(description) {
 }
 
 
-
+/* =========================================================
+   RENDER WEATHER DATA
+========================================================= */
 function showWeather(data) {
 
     document.getElementById("city").innerText =
-        `${data.city}, ${data.country}`;
+        `${data.name}, ${data.sys.country}`;
 
     document.getElementById("description").innerText =
-        data.description;
+        data.weather[0].description;
 
     document.getElementById("temp").innerText =
-        `${Math.round(data.temp)}°C`;
+        `${Math.round(data.main.temp)}°C`;
 
     document.getElementById("feels").innerText =
-        Math.round(data.feels);
+        Math.round(data.main.feels_like);
 
     document.getElementById("humidity").innerText =
-        data.humidity;
+        data.main.humidity;
 
     document.getElementById("wind").innerText =
-        data.wind;
+        data.wind.speed;
 
     document.getElementById("pressure").innerText =
-        data.pressure;
+        data.main.pressure;
 
     document.getElementById("visibility").innerText =
-        data.visibility;
+        data.visibility ?? "--";
 
     document.getElementById("sunrise").innerText =
-        formatTime(data.sunrise, data.timezone);
+        formatTime(data.sys.sunrise, data.timezone);
 
     document.getElementById("sunset").innerText =
-        formatTime(data.sunset, data.timezone);
+        formatTime(data.sys.sunset, data.timezone);
 
-    // HIGH RES ICON
+    // High resolution weather icon
     document.getElementById("icon").src =
-        `https://openweathermap.org/img/wn/${data.icon}@4x.png`;
+        `https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`;
 
-    setBackground(data.description.toLowerCase());
+    setBackground(data.weather[0].description);
 }
+
+
+/* =========================================================
+   AQI COLOR INDICATOR
+========================================================= */
 function colorAQI(label) {
+
     const el = document.getElementById("aqi");
 
     const colors = {
@@ -73,4 +85,3 @@ function colorAQI(label) {
 
     el.style.color = colors[label] || "inherit";
 }
-

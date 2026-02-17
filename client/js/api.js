@@ -1,15 +1,19 @@
-/* =========================================
-   FETCH WEATHER BY CITY
-========================================= */
+const API_KEY = "YOUR_VERCEL_ENV_KEY"; // keep same name you added in Vercel
+
+
+/* =========================================================
+   CITY WEATHER
+========================================================= */
 async function fetchWeather(city) {
-
     try {
-        const res = await fetch(`/api/weather?type=city&city=${encodeURIComponent(city)}`);
-        const data = await res.json();
 
-        if (data.cod && data.cod !== 200) return { error: true };
+        const res = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`
+        );
 
-        return formatWeather(data);
+        if (!res.ok) return { error: true };
+
+        return await res.json();
 
     } catch {
         return { error: true };
@@ -17,18 +21,19 @@ async function fetchWeather(city) {
 }
 
 
-/* =========================================
-   FETCH WEATHER BY COORDINATES
-========================================= */
+/* =========================================================
+   GPS WEATHER
+========================================================= */
 async function fetchWeatherByCoords(lat, lon) {
-
     try {
-        const res = await fetch(`/api/weather?type=coords&lat=${lat}&lon=${lon}`);
-        const data = await res.json();
 
-        if (data.cod && data.cod !== 200) return { error: true };
+        const res = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
+        );
 
-        return formatWeather(data);
+        if (!res.ok) return { error: true };
+
+        return await res.json();
 
     } catch {
         return { error: true };
@@ -36,23 +41,19 @@ async function fetchWeatherByCoords(lat, lon) {
 }
 
 
-/* =========================================
-   FETCH AIR QUALITY
-========================================= */
+/* =========================================================
+   AQI (SERVERLESS FUNCTION)
+========================================================= */
 async function fetchAQI(lat, lon) {
-
     try {
-        const res = await fetch(`/api/weather?type=air&lat=${lat}&lon=${lon}`);
-        const data = await res.json();
 
-        const aqi = data.list[0].main.aqi;
+        const res = await fetch(`/api/air?lat=${lat}&lon=${lon}`);
 
-        return {
-            aqi: aqi,
-            aqiLabel: ["Good","Fair","Moderate","Poor","Very Poor"][aqi - 1]
-        };
+        if (!res.ok) return null;
+
+        return await res.json();
 
     } catch {
-        return { aqi: null, aqiLabel: "--" };
+        return null;
     }
 }

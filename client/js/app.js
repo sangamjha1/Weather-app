@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (!data || data.error) return;
 
                     showWeather(data);
-                    loadAQI(data.lat, data.lon);
+                    loadAQI(latitude, longitude);
 
                 } catch {
                     console.warn("Location weather failed");
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             showWeather(data);
-            loadAQI(data.lat, data.lon);
+            loadAQI(data.coord.lat, data.coord.lon);
 
         } catch {
             alert("Unable to fetch weather right now");
@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   AQI FETCHER (NOW USES SERVERLESS FUNCTION)
+   AQI FETCHER (DIRECT OPENWEATHER)
 ========================================================= */
 
 async function loadAQI(lat, lon) {
@@ -107,12 +107,16 @@ async function loadAQI(lat, lon) {
     try {
         const data = await fetchAQI(lat, lon);
 
-        if (data && data.aqi !== null) {
-            aqiEl.innerText = `${data.aqi} (${data.aqiLabel})`;
-            colorAQI(data.aqiLabel);
-        } else {
+        if (!data) {
             aqiEl.innerText = "--";
+            return;
         }
+
+        const level = data.main.aqi;
+        const label = ["Good","Fair","Moderate","Poor","Very Poor"][level - 1];
+
+        aqiEl.innerText = `${level} (${label})`;
+        colorAQI(label);
 
     } catch {
         aqiEl.innerText = "--";
