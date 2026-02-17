@@ -1,4 +1,4 @@
-# 🌦 Weather Insight App
+# 🌦 Weather App - Mausam Forecast
 
 A full-stack weather application built using **HTML, CSS, JavaScript and Node.js**.
 The app provides real-time weather data using a secure backend proxy and OpenWeather API.
