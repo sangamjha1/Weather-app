@@ -1,11 +1,9 @@
 /* =========================================================
-   CONFIG
+   OPENWEATHER CONFIG
 ========================================================= */
 
-const API_KEY = "3d209e7f431f7f80c9ed98c752708592";   // temporary direct use
-
-const BASE_WEATHER = "https://api.openweathermap.org/data/2.5/weather";
-const BASE_AIR = "https://api.openweathermap.org/data/2.5/air_pollution";
+const API_KEY = "3d209e7f431f7f80c9ed98c752708592";
+const BASE_URL = "https://api.openweathermap.org/data/2.5";
 
 
 /* =========================================================
@@ -16,86 +14,85 @@ async function fetchWeather(city) {
 
     try {
         const res = await fetch(
-            `${BASE_WEATHER}?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`
+            `${BASE_URL}/weather?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`
         );
-
-        if (!res.ok) return { error: true };
 
         const data = await res.json();
 
-        return formatWeatherData(data);
+        // API returns cod: "404" when city not found
+        if (data.cod != 200) {
+            return { error: true, message: data.message };
+        }
 
-    } catch {
+        return formatWeather(data);
+
+    } catch (err) {
+        console.error("Weather fetch failed:", err);
         return { error: true };
     }
 }
 
 
 /* =========================================================
-   FETCH WEATHER BY COORDS
+   FETCH WEATHER BY COORDINATES (GPS)
 ========================================================= */
 
 async function fetchWeatherByCoords(lat, lon) {
 
     try {
         const res = await fetch(
-            `${BASE_WEATHER}?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
+            `${BASE_URL}/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
         );
-
-        if (!res.ok) return { error: true };
 
         const data = await res.json();
 
-        return formatWeatherData(data);
+        if (data.cod != 200) return { error: true };
 
-    } catch {
+        return formatWeather(data);
+
+    } catch (err) {
+        console.error("Geo weather failed:", err);
         return { error: true };
     }
 }
 
 
 /* =========================================================
-   FETCH AQI
+   FETCH AIR QUALITY
 ========================================================= */
 
 async function fetchAQI(lat, lon) {
 
     try {
         const res = await fetch(
-            `${BASE_AIR}?lat=${lat}&lon=${lon}&appid=${API_KEY}`
+            `${BASE_URL}/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
         );
-
-        if (!res.ok) return null;
 
         const data = await res.json();
 
-        const aqiIndex = data.list[0].main.aqi;
+        if (!data || !data.list || !data.list.length)
+            return { error: true };
 
-        const labels = {
-            1: "Good",
-            2: "Fair",
-            3: "Moderate",
-            4: "Poor",
-            5: "Very Poor"
-        };
+        const aqiValue = data.list[0].main.aqi;
+        const aqiLabel = aqiToText(aqiValue);
 
         return {
-            aqi: aqiIndex,
-            aqiLabel: labels[aqiIndex]
+            aqi: convertAQI(aqiValue),
+            aqiLabel
         };
 
-    } catch {
-        return null;
+    } catch (err) {
+        console.error("AQI failed:", err);
+        return { error: true };
     }
 }
 
 
 /* =========================================================
-   FORMAT DATA (VERY IMPORTANT)
+   HELPERS
 ========================================================= */
 
-function formatWeatherData(data) {
-
+function formatWeather(data) {
     return {
         city: data.name,
         country: data.sys.country,
@@ -106,8 +103,8 @@ function formatWeatherData(data) {
         feels: data.main.feels_like,
         humidity: data.main.humidity,
         pressure: data.main.pressure,
-        wind: data.wind.speed,
         visibility: data.visibility,
+        wind: data.wind.speed,
 
         sunrise: data.sys.sunrise,
         sunset: data.sys.sunset,
@@ -116,4 +113,28 @@ function formatWeatherData(data) {
         lat: data.coord.lat,
         lon: data.coord.lon
     };
+}
+
+
+/* Convert OWM AQI (1-5) → Approx real AQI scale */
+function convertAQI(level) {
+    const map = {
+        1: 40,
+        2: 80,
+        3: 130,
+        4: 200,
+        5: 300
+    };
+    return map[level] || level;
+}
+
+function aqiToText(level) {
+    const labels = {
+        1: "Good",
+        2: "Fair",
+        3: "Moderate",
+        4: "Poor",
+        5: "Very Poor"
+    };
+    return labels[level] || "Unknown";
 }
