@@ -5,6 +5,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const locBtn = document.getElementById("locBtn");
     const themeToggle = document.getElementById("themeToggle");
     const aqiEl = document.getElementById("aqi");
+    const isIOS =
+        /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
+    let locationInProgress = false;
 
 
     /* =========================================================
@@ -25,10 +29,20 @@ document.addEventListener("DOMContentLoaded", () => {
        LOAD CURRENT LOCATION ON PAGE OPEN
     ========================================================= */
 
+    // iOS Safari can suppress geolocation prompt on initial page load.
+    // Try once on load and retry on first user interaction.
     loadCurrentLocation();
+    if (isIOS) setupIOSLocationRetry();
+
+    function setupIOSLocationRetry() {
+        const retry = () => loadCurrentLocation();
+        document.addEventListener("touchend", retry, { once: true });
+        document.addEventListener("click", retry, { once: true });
+    }
 
     async function loadCurrentLocation() {
-        if (!navigator.geolocation) return;
+        if (!navigator.geolocation || locationInProgress) return;
+        locationInProgress = true;
 
         aqiEl.innerText = "...";
 
@@ -38,16 +52,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 try {
                     const data = await fetchWeatherByCoords(latitude, longitude);
-                    if (!data || data.error) return;
+                    if (!data || data.error) {
+                        locationInProgress = false;
+                        return;
+                    }
 
                     showWeather(data);
                     loadAQI(latitude, longitude);
+                    locationInProgress = false;
 
                 } catch {
                     console.warn("Location weather failed");
+                    locationInProgress = false;
                 }
             },
-            () => console.warn("Location permission denied"),
+            () => {
+                console.warn("Location permission denied");
+                locationInProgress = false;
+            },
             { enableHighAccuracy: false, timeout: 8000 }
         );
     }
