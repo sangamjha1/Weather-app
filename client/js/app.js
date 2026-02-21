@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             },
             (err) => {
-                if (err && err.code === 1 && userInitiated) {
+                if (isIOS && err && err.code === 1 && userInitiated) {
                     alert("Location permission is blocked. Enable location access in iPhone browser settings for this site.");
                 }
                 console.warn("Location permission denied");
