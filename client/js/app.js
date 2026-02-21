@@ -9,6 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
         /iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
     let locationInProgress = false;
+    const WEATHER_CACHE_KEY = "lastLocationWeather";
+    const AQI_CACHE_KEY = "lastLocationAQI";
+    const CACHE_TTL_MS = 15 * 60 * 1000;
+    const GEO_MAX_AGE_MS = 5 * 60 * 1000;
 
 
     /* =========================================================
@@ -29,6 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
        LOAD CURRENT LOCATION ON PAGE OPEN
     ========================================================= */
 
+    renderCachedLocationWeather();
+
     // iOS Safari can suppress geolocation prompt on initial page load.
     // Try once on load and retry on first user interaction.
     loadCurrentLocation();
@@ -40,11 +46,71 @@ document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener("click", retry, { once: true });
     }
 
+    function getCachedJson(key) {
+        try {
+            const raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function isFresh(timestamp) {
+        return Number.isFinite(timestamp) && Date.now() - timestamp < CACHE_TTL_MS;
+    }
+
+    function setCachedJson(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch {
+            // Ignore storage errors on constrained devices.
+        }
+    }
+
+    function renderCachedLocationWeather() {
+        const weatherCache = getCachedJson(WEATHER_CACHE_KEY);
+        if (weatherCache && weatherCache.data && isFresh(weatherCache.ts)) {
+            showWeather(weatherCache.data);
+        }
+
+        const aqiCache = getCachedJson(AQI_CACHE_KEY);
+        if (aqiCache && isFresh(aqiCache.ts)) {
+            renderAQI(aqiCache.data);
+        }
+    }
+
+    function renderAQI(data) {
+        if (data && data.aqi !== null) {
+            aqiEl.innerText = `${data.aqi} (${data.aqiLabel})`;
+            colorAQI(data.aqiLabel);
+        } else {
+            aqiEl.innerText = "--";
+        }
+    }
+
+    async function loadAQIAndCache(lat, lon) {
+        try {
+            const data = await fetchAQI(lat, lon);
+
+            if (data && !data.error && data.aqi !== null) {
+                renderAQI(data);
+                setCachedJson(AQI_CACHE_KEY, {
+                    data,
+                    ts: Date.now()
+                });
+            } else {
+                aqiEl.innerText = "--";
+            }
+        } catch {
+            aqiEl.innerText = "--";
+        }
+    }
+
     async function loadCurrentLocation() {
         if (!navigator.geolocation || locationInProgress) return;
         locationInProgress = true;
 
-        aqiEl.innerText = "...";
+        if (aqiEl.innerText === "--") aqiEl.innerText = "...";
 
         navigator.geolocation.getCurrentPosition(
             async (pos) => {
@@ -58,7 +124,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
 
                     showWeather(data);
-                    loadAQI(latitude, longitude);
+                    setCachedJson(WEATHER_CACHE_KEY, {
+                        data,
+                        ts: Date.now()
+                    });
+                    loadAQIAndCache(latitude, longitude);
                     locationInProgress = false;
 
                 } catch {
@@ -70,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.warn("Location permission denied");
                 locationInProgress = false;
             },
-            { enableHighAccuracy: false, timeout: 8000 }
+            { enableHighAccuracy: false, timeout: 7000, maximumAge: GEO_MAX_AGE_MS }
         );
     }
 
@@ -93,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             showWeather(data);
-            loadAQI(data.lat, data.lon);
+            loadAQIAndCache(data.lat, data.lon);
 
         } catch {
             alert("Unable to fetch weather right now");
@@ -116,27 +186,3 @@ document.addEventListener("DOMContentLoaded", () => {
     locBtn.addEventListener("click", loadCurrentLocation);
 
 });
-
-
-/* =========================================================
-   AQI FETCHER (VIA BACKEND API)
-========================================================= */
-
-async function loadAQI(lat, lon) {
-
-    const aqiEl = document.getElementById("aqi");
-
-    try {
-        const data = await fetchAQI(lat, lon);
-
-        if (data && data.aqi !== null) {
-            aqiEl.innerText = `${data.aqi} (${data.aqiLabel})`;
-            colorAQI(data.aqiLabel);
-        } else {
-            aqiEl.innerText = "--";
-        }
-
-    } catch {
-        aqiEl.innerText = "--";
-    }
-}
