@@ -13,12 +13,13 @@ async function fetchWeather(city) {
 
     try {
         const res = await fetch(`${BASE_URL}?type=city&city=${encodeURIComponent(city)}`);
-
         const data = await res.json();
 
-        // API returns cod: "404" when city not found
-        if (data.cod != 200) {
-            return { error: true, message: data.message };
+        if (!res.ok || data.cod != 200) {
+            return {
+                error: true,
+                message: data.message || data.error || "Weather request failed"
+            };
         }
 
         return formatWeather(data);
@@ -38,10 +39,14 @@ async function fetchWeatherByCoords(lat, lon) {
 
     try {
         const res = await fetch(`${BASE_URL}?type=coords&lat=${lat}&lon=${lon}`);
-
         const data = await res.json();
 
-        if (data.cod != 200) return { error: true };
+        if (!res.ok || data.cod != 200) {
+            return {
+                error: true,
+                message: data.message || data.error || "Location weather request failed"
+            };
+        }
 
         return formatWeather(data);
 
@@ -60,11 +65,14 @@ async function fetchAQI(lat, lon) {
 
     try {
         const res = await fetch(`${BASE_URL}?type=air&lat=${lat}&lon=${lon}`);
-
         const data = await res.json();
 
-        if (!data || !data.list || !data.list.length)
-            return { error: true };
+        if (!res.ok || !data || !data.list || !data.list.length) {
+            return {
+                error: true,
+                message: data?.message || data?.error || "AQI request failed"
+            };
+        }
 
         const aqiValue = data.list[0].main.aqi;
         const aqiLabel = aqiToText(aqiValue);

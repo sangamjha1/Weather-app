@@ -13,7 +13,7 @@ export default async function handler(req, res) {
         // Current weather by city
         if (type === "city") {
             if (!city) return res.status(400).json({ error: "Missing city" });
-            url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
+            url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`;
         }
 
         // Current weather by coordinates

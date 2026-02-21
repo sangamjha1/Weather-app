@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await fetchWeather(city);
 
             if (!data || data.error) {
-                alert("City not found");
+                alert(data?.message || "Unable to fetch weather right now");
                 return;
             }
 
