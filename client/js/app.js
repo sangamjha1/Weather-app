@@ -5,13 +5,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const locBtn = document.getElementById("locBtn");
     const themeToggle = document.getElementById("themeToggle");
     const aqiEl = document.getElementById("aqi");
+    const loadingState = document.getElementById("loadingState");
     const isIOS =
         /iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
     let locationInProgress = false;
+    let hasLocationSuccess = false;
+    let shouldRetryAfterCurrent = false;
+    let iosRetryHandler = null;
+    let loadingJobs = 0;
     const WEATHER_CACHE_KEY = "lastLocationWeather";
     const AQI_CACHE_KEY = "lastLocationAQI";
-    const CACHE_TTL_MS = 15 * 60 * 1000;
     const GEO_MAX_AGE_MS = 5 * 60 * 1000;
 
 
@@ -37,13 +41,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // iOS Safari can suppress geolocation prompt on initial page load.
     // Try once on load and retry on first user interaction.
-    loadCurrentLocation();
+    loadCurrentLocation(false);
     if (isIOS) setupIOSLocationRetry();
 
     function setupIOSLocationRetry() {
-        const retry = () => loadCurrentLocation();
-        document.addEventListener("touchend", retry, { once: true });
-        document.addEventListener("click", retry, { once: true });
+        iosRetryHandler = () => {
+            if (!hasLocationSuccess) loadCurrentLocation(false);
+        };
+        document.addEventListener("touchstart", iosRetryHandler, { passive: true });
+        document.addEventListener("click", iosRetryHandler);
+    }
+
+    function clearIOSLocationRetry() {
+        if (!iosRetryHandler) return;
+        document.removeEventListener("touchstart", iosRetryHandler);
+        document.removeEventListener("click", iosRetryHandler);
+        iosRetryHandler = null;
     }
 
     function getCachedJson(key) {
@@ -55,8 +68,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function isFresh(timestamp) {
-        return Number.isFinite(timestamp) && Date.now() - timestamp < CACHE_TTL_MS;
+    function setLoading(isLoading) {
+        if (!loadingState) return;
+
+        if (isLoading) {
+            loadingJobs += 1;
+        } else {
+            loadingJobs = Math.max(0, loadingJobs - 1);
+        }
+
+        loadingState.classList.toggle("show", loadingJobs > 0);
+        loadingState.setAttribute("aria-busy", loadingJobs > 0 ? "true" : "false");
     }
 
     function setCachedJson(key, value) {
@@ -69,12 +91,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderCachedLocationWeather() {
         const weatherCache = getCachedJson(WEATHER_CACHE_KEY);
-        if (weatherCache && weatherCache.data && isFresh(weatherCache.ts)) {
+        if (weatherCache && weatherCache.data) {
             showWeather(weatherCache.data);
         }
 
         const aqiCache = getCachedJson(AQI_CACHE_KEY);
-        if (aqiCache && isFresh(aqiCache.ts)) {
+        if (aqiCache && aqiCache.data) {
             renderAQI(aqiCache.data);
         }
     }
@@ -106,9 +128,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    async function loadCurrentLocation() {
-        if (!navigator.geolocation || locationInProgress) return;
+    async function loadCurrentLocation(userInitiated = false) {
+        if (!navigator.geolocation) return;
+        if (locationInProgress) {
+            shouldRetryAfterCurrent = true;
+            return;
+        }
         locationInProgress = true;
+        setLoading(true);
 
         if (aqiEl.innerText === "--") aqiEl.innerText = "...";
 
@@ -120,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const data = await fetchWeatherByCoords(latitude, longitude);
                     if (!data || data.error) {
                         locationInProgress = false;
+                        setLoading(false);
                         return;
                     }
 
@@ -128,19 +156,39 @@ document.addEventListener("DOMContentLoaded", () => {
                         data,
                         ts: Date.now()
                     });
-                    loadAQIAndCache(latitude, longitude);
+                    await loadAQIAndCache(latitude, longitude);
+                    hasLocationSuccess = true;
+                    clearIOSLocationRetry();
                     locationInProgress = false;
+                    setLoading(false);
+                    if (shouldRetryAfterCurrent) {
+                        shouldRetryAfterCurrent = false;
+                        loadCurrentLocation(false);
+                    }
 
                 } catch {
                     console.warn("Location weather failed");
                     locationInProgress = false;
+                    setLoading(false);
+                    if (shouldRetryAfterCurrent) {
+                        shouldRetryAfterCurrent = false;
+                        loadCurrentLocation(false);
+                    }
                 }
             },
-            () => {
+            (err) => {
+                if (err && err.code === 1 && userInitiated) {
+                    alert("Location permission is blocked. Enable location access in iPhone browser settings for this site.");
+                }
                 console.warn("Location permission denied");
                 locationInProgress = false;
+                setLoading(false);
+                if (shouldRetryAfterCurrent) {
+                    shouldRetryAfterCurrent = false;
+                    loadCurrentLocation(false);
+                }
             },
-            { enableHighAccuracy: false, timeout: 7000, maximumAge: GEO_MAX_AGE_MS }
+            { enableHighAccuracy: false, timeout: 12000, maximumAge: GEO_MAX_AGE_MS }
         );
     }
 
@@ -153,20 +201,24 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!city) return;
 
         aqiEl.innerText = "...";
+        setLoading(true);
 
         try {
             const data = await fetchWeather(city);
 
             if (!data || data.error) {
                 alert(data?.message || "Unable to fetch weather right now");
+                setLoading(false);
                 return;
             }
 
             showWeather(data);
-            loadAQIAndCache(data.lat, data.lon);
+            await loadAQIAndCache(data.lat, data.lon);
+            setLoading(false);
 
         } catch {
             alert("Unable to fetch weather right now");
+            setLoading(false);
         }
     }
 
@@ -183,6 +235,6 @@ document.addEventListener("DOMContentLoaded", () => {
        GPS BUTTON
     ========================================================= */
 
-    locBtn.addEventListener("click", loadCurrentLocation);
+    locBtn.addEventListener("click", () => loadCurrentLocation(true));
 
 });
