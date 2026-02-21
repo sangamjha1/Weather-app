@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const locBtn = document.getElementById("locBtn");
     const themeToggle = document.getElementById("themeToggle");
     const aqiEl = document.getElementById("aqi");
-    const loadingState = document.getElementById("loadingState");
+    const dataSlots = document.querySelectorAll(".data-slot");
     const isIOS =
         /iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
@@ -69,7 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setLoading(isLoading) {
-        if (!loadingState) return;
 
         if (isLoading) {
             loadingJobs += 1;
@@ -77,8 +76,10 @@ document.addEventListener("DOMContentLoaded", () => {
             loadingJobs = Math.max(0, loadingJobs - 1);
         }
 
-        loadingState.classList.toggle("show", loadingJobs > 0);
-        loadingState.setAttribute("aria-busy", loadingJobs > 0 ? "true" : "false");
+        const showLoading = loadingJobs > 0;
+        dataSlots.forEach((slot) => {
+            slot.classList.toggle("is-loading", showLoading);
+        });
     }
 
     function setCachedJson(key, value) {
