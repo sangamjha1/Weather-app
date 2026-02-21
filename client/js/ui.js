@@ -31,40 +31,40 @@ function setBackground(description) {
 function showWeather(data) {
 
     document.getElementById("city").innerText =
-        `${data.name}, ${data.sys.country}`;
+        `${data.city}, ${data.country}`;
 
     document.getElementById("description").innerText =
-        data.weather[0].description;
+        data.description;
 
     document.getElementById("temp").innerText =
-        `${Math.round(data.main.temp)}°C`;
+        `${Math.round(data.temp)}°C`;
 
     document.getElementById("feels").innerText =
-        Math.round(data.main.feels_like);
+        Math.round(data.feels);
 
     document.getElementById("humidity").innerText =
-        data.main.humidity;
+        data.humidity;
 
     document.getElementById("wind").innerText =
-        data.wind.speed;
+        data.wind;
 
     document.getElementById("pressure").innerText =
-        data.main.pressure;
+        data.pressure;
 
     document.getElementById("visibility").innerText =
         data.visibility ?? "--";
 
     document.getElementById("sunrise").innerText =
-        formatTime(data.sys.sunrise, data.timezone);
+        formatTime(data.sunrise, data.timezone);
 
     document.getElementById("sunset").innerText =
-        formatTime(data.sys.sunset, data.timezone);
+        formatTime(data.sunset, data.timezone);
 
     // High resolution weather icon
     document.getElementById("icon").src =
-        `https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`;
+        `https://openweathermap.org/img/wn/${data.icon}@4x.png`;
 
-    setBackground(data.weather[0].description);
+    setBackground(data.description);
 }
 
 

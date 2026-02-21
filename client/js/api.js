@@ -1,9 +1,8 @@
 /* =========================================================
-   OPENWEATHER CONFIG
+   BACKEND API CONFIG (VERCEL SERVERLESS FUNCTION)
 ========================================================= */
 
-const API_KEY = "b7d147fb956da7f87dafebd8e6028f89";
-const BASE_URL = "https://api.openweathermap.org/data/2.5";
+const BASE_URL = "/api/weather";
 
 
 /* =========================================================
@@ -13,9 +12,7 @@ const BASE_URL = "https://api.openweathermap.org/data/2.5";
 async function fetchWeather(city) {
 
     try {
-        const res = await fetch(
-            `${BASE_URL}/weather?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`
-        );
+        const res = await fetch(`${BASE_URL}?type=city&city=${encodeURIComponent(city)}`);
 
         const data = await res.json();
 
@@ -40,9 +37,7 @@ async function fetchWeather(city) {
 async function fetchWeatherByCoords(lat, lon) {
 
     try {
-        const res = await fetch(
-            `${BASE_URL}/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
-        );
+        const res = await fetch(`${BASE_URL}?type=coords&lat=${lat}&lon=${lon}`);
 
         const data = await res.json();
 
@@ -64,9 +59,7 @@ async function fetchWeatherByCoords(lat, lon) {
 async function fetchAQI(lat, lon) {
 
     try {
-        const res = await fetch(
-            `${BASE_URL}/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
-        );
+        const res = await fetch(`${BASE_URL}?type=air&lat=${lat}&lon=${lon}`);
 
         const data = await res.json();
 

@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             showWeather(data);
-            loadAQI(data.coord.lat, data.coord.lon);
+            loadAQI(data.lat, data.lon);
 
         } catch {
             alert("Unable to fetch weather right now");
@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* =========================================================
-   AQI FETCHER (DIRECT OPENWEATHER)
+   AQI FETCHER (VIA BACKEND API)
 ========================================================= */
 
 async function loadAQI(lat, lon) {
